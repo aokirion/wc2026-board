@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>応援ドラフト｜2026 W杯 生存ボード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#0b1a38; --bg-1:#060d1c;
+    --card:#102146; --card-2:#0d1b3a;
+    --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.04);
+    --ink:#eaf1ff; --muted:#8aa0c8; --muted-2:#62759b;
+    --accent:#2fe39b; --gold:#ffce5c; --danger:#ff6079;
+    --r:16px; font-synthesis-weight:none;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:"Inter","Noto Sans JP",system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(47,227,155,.06), transparent 60%),
+      radial-gradient(900px 500px at 0% 0%, rgba(120,150,255,.07), transparent 55%),
+      linear-gradient(180deg,var(--bg-0),var(--bg-1) 70%);
+    background-attachment:fixed; min-height:100vh;
+    -webkit-font-smoothing:antialiased; letter-spacing:.1px;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:22px 16px 80px}
+  .tnum{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+
+  header.top{padding:6px 2px 14px}
+  .kicker{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:12.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+  .kicker .bar{width:4px;height:15px;border-radius:2px;background:var(--accent);box-shadow:0 0 14px rgba(47,227,155,.55)}
+  h1{font-size:clamp(25px,6vw,40px);line-height:1.04;margin:9px 0 6px;font-weight:900;letter-spacing:-.02em}
+  h1 .em{color:var(--accent)}
+  .sub{color:var(--muted);font-size:14px;max-width:60ch;margin:0}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .pill{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);
+        border-radius:999px;padding:6px 11px;font-size:12.5px;color:var(--muted);font-weight:600}
+  .pill b{color:var(--ink);font-weight:800}
+  .pill.live{border-color:rgba(47,227,155,.4)}
+  .pill.live .ld{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 2s infinite}
+  .pill.snap{border-color:rgba(255,206,92,.35);color:var(--gold)}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:12px;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:9px;height:9px;border-radius:50%}
+  .dot.a{background:var(--accent)} .dot.g{background:var(--gold)} .dot.d{background:var(--danger)}
+
+  nav.tabs{position:sticky;top:0;z-index:30;margin:18px 0 20px;
+    background:linear-gradient(180deg,rgba(8,15,30,.92),rgba(8,15,30,.78));
+    backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;padding:5px;
+    display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+  nav.tabs button{font:inherit;font-weight:700;font-size:13.5px;color:var(--muted);background:transparent;
+    border:0;border-radius:10px;padding:10px 6px;cursor:pointer;transition:.18s}
+  nav.tabs button:hover{color:var(--ink)}
+  nav.tabs button[aria-selected="true"]{color:#06231a;background:var(--accent);box-shadow:0 6px 18px rgba(47,227,155,.28)}
+  nav.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  section[hidden]{display:none}
+  .secttl{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:2px 2px 13px}
+  .secttl h2{font-size:16px;font-weight:800;margin:0;letter-spacing:.01em}
+  .secttl .hint{font-size:12px;color:var(--muted-2)}
+
+  .grid-p{display:grid;grid-template-columns:1fr;gap:13px}
+  @media(min-width:680px){.grid-p{grid-template-columns:1fr 1fr}}
+  .pcard{position:relative;background:linear-gradient(180deg,var(--card),var(--card-2));
+    border:1px solid var(--line);border-radius:var(--r);padding:16px 16px 14px;overflow:hidden;animation:rise .5s both}
+  .pcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--pc,#888)}
+  .pcard.lead{border-color:rgba(255,206,92,.5);box-shadow:0 0 0 1px rgba(255,206,92,.25),0 18px 40px -22px rgba(255,206,92,.5)}
+  .phead{display:flex;align-items:center;gap:11px}
+  .rank{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+    font-weight:900;font-size:14px;background:#0a1733;border:1px solid var(--line);color:var(--muted)}
+  .pcard.lead .rank{background:var(--gold);color:#3a2a00;border-color:transparent}
+  .pname{font-weight:900;font-size:18px;letter-spacing:.01em;display:flex;align-items:center;gap:8px}
+  .pname .crown{font-size:13px}
+  .tag-lead{font-size:10.5px;font-weight:800;letter-spacing:.08em;color:#3a2a00;background:var(--gold);border-radius:999px;padding:3px 8px;text-transform:uppercase}
+  .alive{margin-left:auto;text-align:right;line-height:1}
+  .alive .n{font-size:30px;font-weight:900;color:var(--accent)}
+  .alive .n.dead{color:var(--danger)}
+  .alive .of{font-size:13px;color:var(--muted-2);font-weight:700}
+  .alive .lbl{display:block;font-size:10px;color:var(--muted-2);letter-spacing:.16em;margin-top:3px;text-transform:uppercase}
+
+  .substat{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 11px;font-size:11.5px;color:var(--muted)}
+  .substat .s{background:#0c1838;border:1px solid var(--line-2);border-radius:8px;padding:4px 8px}
+  .substat .s b{color:var(--ink);font-weight:800}
+
+  .pips{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .pip{display:flex;align-items:center;gap:7px;background:#0c1838;border:1px solid var(--line-2);border-radius:9px;padding:6px 8px;min-width:0}
+  .pip .fl{font-size:15px;line-height:1;flex:none}
+  .pip .nm{font-size:12px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pip .st{margin-left:auto;font-size:10.5px;font-weight:800;color:var(--muted-2);flex:none}
+  .pip .st.win{color:var(--accent)} .pip .st.adv{color:var(--gold)}
+  .pip.elim{opacity:.45} .pip.elim .nm{text-decoration:line-through} .pip.elim .st{color:var(--danger)}
+  .pip.adv{border-color:rgba(255,206,92,.4)}
+
+  .grid-g{display:grid;grid-template-columns:1fr;gap:13px}
+  @media(min-width:560px){.grid-g{grid-template-columns:1fr 1fr}}
+  @media(min-width:900px){.grid-g{grid-template-columns:1fr 1fr 1fr}}
+  .gcard{background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid var(--line);border-radius:14px;padding:13px 13px 11px;animation:rise .5s both}
+  .ghead{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+  .ghead .gl{font-weight:900;font-size:13px;letter-spacing:.12em;color:var(--muted)}
+  .ghead .gl b{color:var(--ink);font-size:15px}
+  .ghead .gp{font-size:10.5px;color:var(--muted-2);font-weight:700}
+  table.std{width:100%;border-collapse:collapse;font-size:12.5px}
+  table.std th{font-size:10px;color:var(--muted-2);font-weight:700;text-align:right;padding:0 0 5px;letter-spacing:.06em}
+  table.std th.l{text-align:left}
+  table.std td{padding:6px 0;border-top:1px solid var(--line-2);text-align:right;color:var(--ink);font-weight:700}
+  table.std td.l{text-align:left;font-weight:600}
+  .teamcell{display:flex;align-items:center;gap:7px;min-width:0}
+  .teamcell .fl{font-size:14px;flex:none}
+  .teamcell .tn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:11ch}
+  .pos{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:5px;font-size:10px;font-weight:900;background:#0a1733;color:var(--muted-2);margin-right:6px;flex:none}
+  tr.q .pos{background:var(--accent);color:#06231a}
+  tr.q3 .pos{background:rgba(255,206,92,.85);color:#3a2a00}
+  .own{font-size:9.5px;font-weight:800;border-radius:5px;padding:2px 5px;color:#06122e;flex:none}
+  td.elim .tn{text-decoration:line-through;color:var(--muted-2)}
+  .gfix{margin-top:9px;border-top:1px solid var(--line-2);padding-top:8px;display:flex;flex-direction:column;gap:4px}
+  .fx{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+  .fx .sc{margin-left:auto;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+  .fx .sc.tbd{color:var(--muted-2);font-weight:700}
+
+  .daygrp{margin-bottom:16px}
+  .dayttl{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.08em;margin:0 2px 8px;display:flex;align-items:center;gap:8px}
+  .dayttl::after{content:"";flex:1;height:1px;background:var(--line)}
+  .mlist{display:grid;grid-template-columns:1fr;gap:8px}
+  @media(min-width:620px){.mlist{grid-template-columns:1fr 1fr}}
+  .mrow{display:flex;align-items:center;gap:9px;background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid var(--line);border-radius:11px;padding:10px 12px}
+  .mrow.pending{opacity:.72}
+  .mrow .glab{flex:none;font-size:10px;font-weight:900;color:var(--muted-2);width:18px;text-align:center}
+  .side{display:flex;align-items:center;gap:6px;min-width:0;flex:1}
+  .side.away{justify-content:flex-end;text-align:right}
+  .side .fl{font-size:15px;flex:none}
+  .side .nm{font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .side .ow{width:7px;height:7px;border-radius:50%;flex:none}
+  .score{flex:none;font-weight:900;font-size:14px;font-variant-numeric:tabular-nums;min-width:46px;text-align:center}
+  .score.tbd{font-size:11px;font-weight:800;color:var(--muted-2);letter-spacing:.04em}
+  .win-n{color:var(--accent)}
+
+  details.note{margin-top:26px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:2px 16px}
+  details.note summary{cursor:pointer;font-weight:800;font-size:13.5px;padding:13px 0;list-style:none;display:flex;align-items:center;gap:9px}
+  details.note summary::-webkit-details-marker{display:none}
+  details.note summary .ic{color:var(--accent)}
+  details.note[open] summary{border-bottom:1px solid var(--line-2)}
+  .notebody{font-size:13px;color:var(--muted);line-height:1.7;padding:12px 0 16px}
+  .notebody code{background:#0a1733;border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-family:"Inter",ui-monospace,monospace;font-size:12px;color:#cfe0ff}
+  .notebody b{color:var(--ink)}
+  footer.ft{margin-top:22px;text-align:center;color:var(--muted-2);font-size:11.5px;line-height:1.6}
+
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="kicker"><span class="bar"></span>応援ドラフト · FIFA World Cup 2026</div>
+    <h1>担当チーム <span class="em">生存ボード</span></h1>
+    <p class="sub">8人 × 各6か国（全48か国）。それぞれが担当する国の勝ち上がりを追跡します。最後まで多くの国を生き残らせた人が勝者。</p>
+    <div class="meta" id="meta"></div>
+    <div class="legend">
+      <span><i class="dot a"></i>生存中</span>
+      <span><i class="dot g"></i>突破（次ラウンド進出）</span>
+      <span><i class="dot d"></i>敗退</span>
+      <span style="color:var(--muted-2)">同生存数は「保有国の合計勝点」で順位付け</span>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="表示切替">
+    <button role="tab" aria-selected="true"  data-tab="survive">生き残り</button>
+    <button role="tab" aria-selected="false" data-tab="groups">グループ</button>
+    <button role="tab" aria-selected="false" data-tab="results">結果・日程</button>
+  </nav>
+
+  <section id="survive" role="tabpanel">
+    <div class="secttl"><h2>生き残りランキング</h2><span class="hint">敗退が出るまでは勝点で競う</span></div>
+    <div class="grid-p" id="pcards"></div>
+  </section>
+  <section id="groups" role="tabpanel" hidden>
+    <div class="secttl"><h2>グループ順位表</h2><span class="hint">上位2位が自動突破（緑）／3位は8枠で敗者復活</span></div>
+    <div class="grid-g" id="gcards"></div>
+  </section>
+  <section id="results" role="tabpanel" hidden>
+    <div class="secttl"><h2>結果・日程</h2><span class="hint">日付は現地基準</span></div>
+    <div id="mdays"></div>
+  </section>
+
+  <details class="note">
+    <summary><span class="ic">⟳</span>更新のしくみ</summary>
+    <div class="notebody">
+      このボードは毎日 <b>9:00 / 17:00（JST）</b> に GitHub Actions が <code>data.json</code> を自動更新します（モデルは Sonnet）。
+      手動で直したい場合は <code>data.json</code> を編集すれば反映されます。順位・勝点・得失点・生存数はすべて自動計算です。
+    </div>
+  </details>
+  <footer class="ft" id="foot"></footer>
+</div>
+
+<script>
+/* ── ローカル(file://)で開いた時のフォールバック・スナップショット ──
+   通常は同じ階層の data.json を読み込んで上書きします。 */
+const FALLBACK = {
+  "meta":{"asOf":"2026/6/13"},
+  "participants":[
+    {"no":1,"name":"青木","color":"#38bdf8","teams":["モロッコ","ベルギー","トルコ","カナダ","南アフリカ","キュラソー"]},
+    {"no":2,"name":"薮野","color":"#fb923c","teams":["ポルトガル","クロアチア","オーストラリア","ノルウェー","チュニジア","ガーナ"]},
+    {"no":3,"name":"久保田","color":"#a78bfa","teams":["アルゼンチン","コロンビア","オーストリア","アルジェリア","パラグアイ","ニュージーランド"]},
+    {"no":4,"name":"宮坂","color":"#22d3ee","teams":["ブラジル","セネガル","日本","チェコ","スコットランド","ハイチ"]},
+    {"no":5,"name":"山中","color":"#f472b6","teams":["フランス","ウルグアイ","韓国","スウェーデン","ウズベキスタン","ボスニア"]},
+    {"no":6,"name":"曽根","color":"#f87171","teams":["イングランド","メキシコ","イラン","コートジボワール","コンゴ民主共和国","カボベルデ"]},
+    {"no":7,"name":"新城","color":"#818cf8","teams":["オランダ","アメリカ","スイス","パナマ","カタール","ヨルダン"]},
+    {"no":8,"name":"勝間","color":"#facc15","teams":["スペイン","ドイツ","エクアドル","エジプト","イラク","サウジアラビア"]}
+  ],
+  "teams":{
+    "モロッコ":{"flag":"🇲🇦","group":"C","seed":8,"status":"alive"},"ベルギー":{"flag":"🇧🇪","group":"G","seed":9,"status":"alive"},
+    "トルコ":{"flag":"🇹🇷","group":"D","seed":20,"status":"alive"},"カナダ":{"flag":"🇨🇦","group":"B","seed":27,"status":"alive"},
+    "南アフリカ":{"flag":"🇿🇦","group":"A","seed":40,"status":"alive"},"キュラソー":{"flag":"🇨🇼","group":"E","seed":46,"status":"alive"},
+    "ポルトガル":{"flag":"🇵🇹","group":"K","seed":5,"status":"alive"},"クロアチア":{"flag":"🇭🇷","group":"L","seed":11,"status":"alive"},
+    "オーストラリア":{"flag":"🇦🇺","group":"D","seed":24,"status":"alive"},"ノルウェー":{"flag":"🇳🇴","group":"I","seed":28,"status":"alive"},
+    "チュニジア":{"flag":"🇹🇳","group":"F","seed":35,"status":"alive"},"ガーナ":{"flag":"🇬🇭","group":"L","seed":45,"status":"alive"},
+    "アルゼンチン":{"flag":"🇦🇷","group":"J","seed":3,"status":"alive"},"コロンビア":{"flag":"🇨🇴","group":"K","seed":12,"status":"alive"},
+    "オーストリア":{"flag":"🇦🇹","group":"J","seed":22,"status":"alive"},"アルジェリア":{"flag":"🇩🇿","group":"J","seed":25,"status":"alive"},
+    "パラグアイ":{"flag":"🇵🇾","group":"D","seed":33,"status":"alive"},"ニュージーランド":{"flag":"🇳🇿","group":"G","seed":48,"status":"alive","name":"NZ"},
+    "ブラジル":{"flag":"🇧🇷","group":"C","seed":6,"status":"alive"},"セネガル":{"flag":"🇸🇳","group":"I","seed":13,"status":"alive"},
+    "日本":{"flag":"🇯🇵","group":"F","seed":17,"status":"alive"},"チェコ":{"flag":"🇨🇿","group":"A","seed":32,"status":"alive"},
+    "スコットランド":{"flag":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","group":"C","seed":34,"status":"alive"},"ハイチ":{"flag":"🇭🇹","group":"C","seed":47,"status":"alive"},
+    "フランス":{"flag":"🇫🇷","group":"I","seed":1,"status":"alive"},"ウルグアイ":{"flag":"🇺🇾","group":"H","seed":16,"status":"alive"},
+    "韓国":{"flag":"🇰🇷","group":"A","seed":23,"status":"alive"},"スウェーデン":{"flag":"🇸🇪","group":"F","seed":31,"status":"alive"},
+    "ウズベキスタン":{"flag":"🇺🇿","group":"K","seed":37,"status":"alive"},"ボスニア":{"flag":"🇧🇦","group":"B","seed":42,"status":"alive"},
+    "イングランド":{"flag":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","group":"L","seed":4,"status":"alive"},"メキシコ":{"flag":"🇲🇽","group":"A","seed":14,"status":"alive"},
+    "イラン":{"flag":"🇮🇷","group":"G","seed":19,"status":"alive"},"コートジボワール":{"flag":"🇨🇮","group":"E","seed":30,"status":"alive"},
+    "コンゴ民主共和国":{"flag":"🇨🇩","group":"K","seed":36,"status":"alive","name":"DRコンゴ"},"カボベルデ":{"flag":"🇨🇻","group":"H","seed":44,"status":"alive"},
+    "オランダ":{"flag":"🇳🇱","group":"F","seed":7,"status":"alive"},"アメリカ":{"flag":"🇺🇸","group":"D","seed":15,"status":"alive"},
+    "スイス":{"flag":"🇨🇭","group":"B","seed":18,"status":"alive"},"パナマ":{"flag":"🇵🇦","group":"L","seed":29,"status":"alive"},
+    "カタール":{"flag":"🇶🇦","group":"B","seed":38,"status":"alive"},"ヨルダン":{"flag":"🇯🇴","group":"J","seed":43,"status":"alive"},
+    "スペイン":{"flag":"🇪🇸","group":"H","seed":2,"status":"alive"},"ドイツ":{"flag":"🇩🇪","group":"E","seed":10,"status":"alive"},
+    "エクアドル":{"flag":"🇪🇨","group":"E","seed":21,"status":"alive"},"エジプト":{"flag":"🇪🇬","group":"G","seed":26,"status":"alive"},
+    "イラク":{"flag":"🇮🇶","group":"I","seed":39,"status":"alive"},"サウジアラビア":{"flag":"🇸🇦","group":"H","seed":41,"status":"alive","name":"サウジ"}
+  },
+  "matches":[
+    {"g":"A","h":"メキシコ","a":"南アフリカ","hs":2,"as":0,"d":"6/11","played":true},
+    {"g":"A","h":"韓国","a":"チェコ","hs":2,"as":1,"d":"6/11","played":true},
+    {"g":"B","h":"カナダ","a":"ボスニア","hs":1,"as":1,"d":"6/12","played":true},
+    {"g":"D","h":"アメリカ","a":"パラグアイ","hs":4,"as":1,"d":"6/12","played":true},
+    {"g":"B","h":"カタール","a":"スイス","d":"6/13","played":false},
+    {"g":"C","h":"ブラジル","a":"モロッコ","d":"6/13","played":false},
+    {"g":"C","h":"ハイチ","a":"スコットランド","d":"6/13","played":false},
+    {"g":"D","h":"オーストラリア","a":"トルコ","d":"6/13","played":false},
+    {"g":"E","h":"ドイツ","a":"キュラソー","d":"6/14","played":false},
+    {"g":"E","h":"コートジボワール","a":"エクアドル","d":"6/14","played":false},
+    {"g":"F","h":"オランダ","a":"日本","d":"6/14","played":false},
+    {"g":"F","h":"スウェーデン","a":"チュニジア","d":"6/14","played":false},
+    {"g":"G","h":"ベルギー","a":"エジプト","d":"6/15","played":false},
+    {"g":"G","h":"イラン","a":"ニュージーランド","d":"6/15","played":false},
+    {"g":"H","h":"スペイン","a":"カボベルデ","d":"6/15","played":false},
+    {"g":"H","h":"サウジアラビア","a":"ウルグアイ","d":"6/15","played":false},
+    {"g":"I","h":"フランス","a":"セネガル","d":"6/16","played":false},
+    {"g":"I","h":"イラク","a":"ノルウェー","d":"6/16","played":false},
+    {"g":"J","h":"アルゼンチン","a":"アルジェリア","d":"6/16","played":false},
+    {"g":"J","h":"オーストリア","a":"ヨルダン","d":"6/16","played":false},
+    {"g":"K","h":"ポルトガル","a":"コンゴ民主共和国","d":"6/17","played":false},
+    {"g":"K","h":"ウズベキスタン","a":"コロンビア","d":"6/17","played":false},
+    {"g":"L","h":"イングランド","a":"クロアチア","d":"6/17","played":false},
+    {"g":"L","h":"ガーナ","a":"パナマ","d":"6/17","played":false}
+  ]
+};
+
+const GROUPS=["A","B","C","D","E","F","G","H","I","J","K","L"];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function computeStats(TEAMS,MATCHES){
+  const st={}; Object.keys(TEAMS).forEach(k=>st[k]={p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0});
+  MATCHES.forEach(m=>{
+    if(!m.played||st[m.h]===undefined||st[m.a]===undefined) return;
+    const H=st[m.h],A=st[m.a];
+    H.p++;A.p++;H.gf+=m.hs;H.ga+=m.as;A.gf+=m.as;A.ga+=m.hs;
+    if(m.hs>m.as){H.w++;A.l++;H.pts+=3;} else if(m.hs<m.as){A.w++;H.l++;A.pts+=3;} else {H.d++;A.d++;H.pts++;A.pts++;}
+  });
+  Object.keys(st).forEach(k=>st[k].gd=st[k].gf-st[k].ga);
+  return st;
+}
+
+function render(DATA,isLive){
+  const META=DATA.meta||{}, PARTICIPANTS=DATA.participants, TEAMS=DATA.teams, MATCHES=DATA.matches;
+  const ST=computeStats(TEAMS,MATCHES);
+  const ownerOf={}; PARTICIPANTS.forEach(p=>p.teams.forEach(t=>ownerOf[t]=p));
+  const disp=k=>(TEAMS[k]&&TEAMS[k].name)||k;
+  const agg=p=>{const o={pts:0,w:0,d:0,l:0,gp:0,alive:0,adv:0,elim:0};
+    p.teams.forEach(k=>{const s=ST[k],t=TEAMS[k];o.pts+=s.pts;o.w+=s.w;o.d+=s.d;o.l+=s.l;o.gp+=s.p;
+      if(t.status==="eliminated")o.elim++;else o.alive++; if(t.status==="advanced")o.adv++;});return o;};
+
+  // meta strip
+  const played=MATCHES.filter(m=>m.played).length;
+  const elim=Object.values(TEAMS).filter(t=>t.status==="eliminated").length;
+  const livePill=isLive
+    ? `<span class="pill live"><i class="ld"></i>自動更新 ON</span>`
+    : `<span class="pill snap">スナップショット表示</span>`;
+  document.getElementById("meta").innerHTML=
+    `<span class="pill">最終更新 <b>${esc(META.asOf||"-")}</b></span>`+livePill+
+    `<span class="pill">全 <b>48</b> か国 / <b>8</b> 人</span>`+
+    `<span class="pill">消化 <b>${played}</b> 試合</span>`+
+    `<span class="pill">敗退 <b>${elim}</b> か国</span>`;
+
+  // survival cards
+  const ranked=PARTICIPANTS.map(p=>({p,a:agg(p)}))
+    .sort((x,y)=>y.a.alive-x.a.alive||y.a.adv-x.a.adv||y.a.pts-x.a.pts||x.p.no-y.p.no);
+  document.getElementById("pcards").innerHTML=ranked.map((row,i)=>{
+    const {p,a}=row,lead=i===0;
+    const pips=p.teams.map(k=>{const t=TEAMS[k],s=ST[k];let cls="pip",stt="未",stc="";
+      if(t.status==="eliminated"){cls+=" elim";stt="敗退";}
+      else if(t.status==="advanced"){cls+=" adv";stt="突破";stc="adv";}
+      else if(s.p>0){stt=s.pts+"pt";if(s.w>0&&s.l===0)stc="win";}
+      return `<div class="${cls}"><span class="fl">${t.flag}</span><span class="nm">${esc(disp(k))}</span><span class="st ${stc}">${stt}</span></div>`;
+    }).join("");
+    return `<div class="pcard ${lead?'lead':''}" style="--pc:${p.color};animation-delay:${i*45}ms">
+      <div class="phead"><div class="rank">${i+1}</div>
+        <div class="pname">${lead?'<span class="crown">👑</span>':''}${esc(p.name)}${lead?'<span class="tag-lead">首位</span>':''}</div>
+        <div class="alive"><span class="n ${a.alive===0?'dead':''} tnum">${a.alive}</span><span class="of">/6</span><span class="lbl">生存</span></div></div>
+      <div class="substat"><span class="s">合計勝点 <b class="tnum">${a.pts}</b></span>
+        <span class="s tnum">${a.gp}試合 <b>${a.w}</b>勝 <b>${a.d}</b>分 <b>${a.l}</b>敗</span>
+        ${a.adv?`<span class="s">突破 <b>${a.adv}</b></span>`:''}${a.elim?`<span class="s">敗退 <b>${a.elim}</b></span>`:''}</div>
+      <div class="pips">${pips}</div></div>`;
+  }).join("");
+
+  // group tables
+  document.getElementById("gcards").innerHTML=GROUPS.map((g,gi)=>{
+    const teams=Object.keys(TEAMS).filter(k=>TEAMS[k].group===g)
+      .sort((x,y)=>ST[y].pts-ST[x].pts||ST[y].gd-ST[x].gd||ST[y].gf-ST[x].gf||TEAMS[x].seed-TEAMS[y].seed);
+    const gplayed=MATCHES.filter(m=>m.g===g&&m.played).length;
+    const rows=teams.map((k,idx)=>{const t=TEAMS[k],s=ST[k],o=ownerOf[k];
+      const q=idx<2?"q":(idx===2?"q3":""); const rec=s.p>0?`${s.gd>0?'+':''}${s.gd}`:"–";
+      const ec=t.status==="eliminated"?"elim":"";
+      return `<tr class="${q}"><td class="l ${ec}"><span class="teamcell"><span class="pos">${idx+1}</span>
+        <span class="fl">${t.flag}</span><span class="tn">${esc(disp(k))}</span>
+        <span class="own" style="background:${o?o.color:'#888'}">${o?esc(o.name):'?'}</span></span></td>
+        <td class="tnum">${s.p}</td><td class="tnum">${rec}</td><td class="tnum"><b>${s.p>0?s.pts:'–'}</b></td></tr>`;
+    }).join("");
+    const fixtures=MATCHES.filter(m=>m.g===g).map(m=>{const sc=m.played?`${m.hs} – ${m.as}`:"予定";
+      return `<div class="fx"><span>${TEAMS[m.h].flag} ${esc(disp(m.h))}</span><span style="color:var(--muted-2)">v</span>
+        <span>${esc(disp(m.a))} ${TEAMS[m.a].flag}</span><span class="sc ${m.played?'':'tbd'}">${sc}</span></div>`;
+    }).join("");
+    return `<div class="gcard" style="animation-delay:${gi*30}ms"><div class="ghead"><span class="gl">GROUP <b>${g}</b></span>
+      <span class="gp">${gplayed} 消化</span></div>
+      <table class="std"><thead><tr><th class="l">チーム</th><th>試</th><th>得失</th><th>点</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="gfix">${fixtures}</div></div>`;
+  }).join("");
+
+  // results / schedule
+  const order=[],byDay={};
+  MATCHES.forEach(m=>{if(!byDay[m.d]){byDay[m.d]=[];order.push(m.d);}byDay[m.d].push(m);});
+  document.getElementById("mdays").innerHTML=order.map(d=>{
+    const rows=byDay[d].map(m=>{const oh=ownerOf[m.h],oa=ownerOf[m.a];let sc;
+      if(m.played){sc=`<span class="${m.hs>m.as?'win-n':''}">${m.hs}</span> - <span class="${m.as>m.hs?'win-n':''}">${m.as}</span>`;}
+      else sc=`<span class="tbd">予定</span>`;
+      return `<div class="mrow ${m.played?'':'pending'}"><span class="glab">${m.g}</span>
+        <span class="side"><span class="fl">${TEAMS[m.h].flag}</span><span class="nm">${esc(disp(m.h))}</span>
+          <span class="ow" style="background:${oh?oh.color:'#888'}"></span></span>
+        <span class="score ${m.played?'':'tbd'}">${sc}</span>
+        <span class="side away"><span class="ow" style="background:${oa?oa.color:'#888'}"></span>
+          <span class="nm">${esc(disp(m.a))}</span><span class="fl">${TEAMS[m.a].flag}</span></span></div>`;
+    }).join("");
+    return `<div class="daygrp"><div class="dayttl">${esc(d)}</div><div class="mlist">${rows}</div></div>`;
+  }).join("");
+
+  document.getElementById("foot").innerHTML=
+    `データ更新: ${esc(META.asOf||'-')} ／ 自動更新 9:00・17:00 JST（GitHub Actions × Sonnet）<br>`+
+    `順位の同点処理は「勝点→得失点→総得点→シード」で簡易表示。`;
+}
+
+/* tabs (一度だけ設定) */
+(function(){
+  const btns=[...document.querySelectorAll('nav.tabs button')];
+  const secs={survive:document.getElementById('survive'),groups:document.getElementById('groups'),results:document.getElementById('results')};
+  btns.forEach(b=>b.addEventListener('click',()=>{
+    btns.forEach(x=>x.setAttribute('aria-selected',x===b));
+    Object.entries(secs).forEach(([k,el])=>el.hidden=(k!==b.dataset.tab));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }));
+})();
+
+/* data.json を読み込み、失敗時はフォールバック */
+fetch('data.json?t='+Date.now(),{cache:'no-store'})
+  .then(r=>{if(!r.ok)throw 0;return r.json();})
+  .then(d=>render(d,true))
+  .catch(()=>render(FALLBACK,false));
+</script>
+</body>
+</html>
