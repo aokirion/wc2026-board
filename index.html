@@ -168,10 +168,30 @@
   .qchip .bd.prov{border:1px solid var(--line);color:var(--muted)}
   .qchip.third{border-color:rgba(255,206,92,.32)}
   .koempty{background:var(--card);border:1px dashed var(--line);border-radius:12px;padding:20px 16px;text-align:center;color:var(--muted-2);font-size:12.5px;line-height:1.6}
-  .koround{margin-bottom:16px}
+  .koround{margin-top:16px}
   .korhead{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.08em;margin:0 2px 8px;display:flex;align-items:center;gap:8px}
   .korhead::after{content:"";flex:1;height:1px;background:var(--line)}
   .korhead .rc{font-size:10px;color:var(--muted-2);font-weight:700}
+  .b3rd{max-width:240px}
+
+  /* bracket（トーナメント表） */
+  .bracket{display:flex;align-items:stretch;gap:16px;overflow-x:auto;padding:2px 2px 12px;-webkit-overflow-scrolling:touch}
+  .bcol{display:flex;flex-direction:column;min-width:172px;flex:none}
+  .bcol-h{flex:none;font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.08em;text-align:center;padding:5px 0;margin-bottom:6px;border-bottom:1px solid var(--line-2)}
+  .bcol-b{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:10px;min-height:120px}
+  .bx{background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .bx.pending{opacity:.72}
+  .bxr{display:flex;align-items:center;gap:7px;padding:7px 9px;min-width:0}
+  .bxr+.bxr{border-top:1px solid var(--line-2)}
+  .bxr .fl{font-size:14px;flex:none}
+  .bxr .ow{width:6px;height:6px;border-radius:50%;flex:none}
+  .bxr .nm{font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .bxr .sc{margin-left:auto;font-weight:800;font-variant-numeric:tabular-nums;flex:none;font-size:13px;color:var(--muted-2)}
+  .bxr.win .nm{color:var(--ink)}
+  .bxr.win .sc{color:var(--accent)}
+  .bxr .pk{font-size:8.5px;font-weight:800;color:var(--accent);margin-left:3px;vertical-align:super}
+  .bxr.lose{opacity:.55}
+  .bxd{font-size:9.5px;color:var(--muted-2);text-align:center;padding:3px 0;border-top:1px solid var(--line-2)}
 
   @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
@@ -326,20 +346,21 @@ function computeQualified(TEAMS,ST){
   return {top2,best3};
 }
 
-/* ノックアウト1試合の行（結果タブと同じ見た目／グループ記号欄は空） */
-function koRow(m,TEAMS,ownerOf,disp){
-  const th=TEAMS[m.h],ta=TEAMS[m.a];
-  const fh=th?th.flag:"🏳️",fa=ta?ta.flag:"🏳️";
-  const oh=ownerOf[m.h],oa=ownerOf[m.a];
-  let sc;
-  if(m.played){sc=`<span class="${m.hs>m.as?'win-n':''}">${m.hs}</span> - <span class="${m.as>m.hs?'win-n':''}">${m.as}</span>`;}
-  else sc=`<span class="tbd">${esc(m.d||'予定')}</span>`;
-  return `<div class="mrow ${m.played?'':'pending'}"><span class="glab"></span>
-    <span class="side"><span class="fl">${fh}</span><span class="nm">${esc(disp(m.h))}</span>
-      <span class="ow" style="background:${oh?oh.color:'#888'}"></span></span>
-    <span class="score ${m.played?'':'tbd'}">${sc}</span>
-    <span class="side away"><span class="ow" style="background:${oa?oa.color:'#888'}"></span>
-      <span class="nm">${esc(disp(m.a))}</span><span class="fl">${fa}</span></span></div>`;
+/* ノックアウト1試合のボックス（チームを縦に2段重ね・勝者ハイライト）
+   同点でPK決着の場合は m.pkw（"h"/"a"）で勝者を示す。 */
+function koBox(m,TEAMS,ownerOf,disp){
+  const pkH=m.played&&m.hs===m.as&&m.pkw==="h", pkA=m.played&&m.hs===m.as&&m.pkw==="a";
+  const hw=m.played&&(m.hs>m.as||pkH), aw=m.played&&(m.as>m.hs||pkA);
+  const side=(name,won,lost,pk)=>{
+    const t=TEAMS[name],o=ownerOf[name];
+    const fl=t?t.flag:"🏳️";
+    const sc=m.played?(name===m.h?m.hs:m.as):"";
+    return `<div class="bxr ${won?'win':''} ${lost?'lose':''}">
+      <span class="fl">${fl}</span><span class="ow" style="background:${o?o.color:'#888'}"></span>
+      <span class="nm">${esc(disp(name))}</span><span class="sc">${sc}${pk?'<span class="pk">PK</span>':''}</span></div>`;
+  };
+  const foot=!m.played?`<div class="bxd">${esc(m.d||'予定')}</div>`:'';
+  return `<div class="bx ${m.played?'':'pending'}">${side(m.h,hw,aw,pkH)}${side(m.a,aw,hw,pkA)}${foot}</div>`;
 }
 
 function render(DATA,isLive){
@@ -454,11 +475,18 @@ function render(DATA,isLive){
   if(!koMatches.length){
     bracketBlock=`<div class="koempty">決勝トーナメントの組み合わせは、グループステージ終了後にFIFA公式で確定し次第ここに表示されます。</div>`;
   }else{
-    bracketBlock=KO_ROUNDS.map(([key,label])=>{
+    // 本選ラウンドを列にして左→右に配置（試合数が半減してトーナメント表の形になる）
+    const COLS=[["R32","ラウンド32"],["R16","ラウンド16"],["QF","準々決勝"],["SF","準決勝"],["FIN","決勝"]];
+    const cols=COLS.map(([key,label])=>{
       const ms=koMatches.filter(m=>m.g===key); if(!ms.length) return "";
-      const rows=ms.map(m=>koRow(m,TEAMS,ownerOf,disp)).join("");
-      return `<div class="koround"><div class="korhead">${label}<span class="rc">${ms.length}</span></div><div class="mlist">${rows}</div></div>`;
+      const boxes=ms.map(m=>koBox(m,TEAMS,ownerOf,disp)).join("");
+      return `<div class="bcol"><div class="bcol-h">${label}</div><div class="bcol-b">${boxes}</div></div>`;
     }).join("");
+    const third=koMatches.filter(m=>m.g==="3rd");
+    const thirdBlock=third.length
+      ? `<div class="koround"><div class="korhead">3位決定戦</div><div class="b3rd">${third.map(m=>koBox(m,TEAMS,ownerOf,disp)).join("")}</div></div>`
+      : "";
+    bracketBlock=`<div class="bracket">${cols}</div>${thirdBlock}`;
   }
   document.getElementById("kobody").innerHTML=qualBlock+bracketBlock;
 
