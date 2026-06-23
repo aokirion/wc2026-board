@@ -52,7 +52,8 @@
   nav.tabs{position:sticky;top:0;z-index:30;margin:18px 0 20px;
     background:linear-gradient(180deg,rgba(8,15,30,.92),rgba(8,15,30,.78));
     backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;padding:5px;
-    display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+    display:grid;grid-template-columns:repeat(2,1fr);gap:4px}
+  @media(min-width:560px){nav.tabs{grid-template-columns:repeat(4,1fr)}}
   nav.tabs button{font:inherit;font-weight:700;font-size:13.5px;color:var(--muted);background:transparent;
     border:0;border-radius:10px;padding:10px 6px;cursor:pointer;transition:.18s}
   nav.tabs button:hover{color:var(--ink)}
@@ -149,6 +150,29 @@
   .notebody b{color:var(--ink)}
   footer.ft{margin-top:22px;text-align:center;color:var(--muted-2);font-size:11.5px;line-height:1.6}
 
+  /* knockout / 決勝トーナメント */
+  .koqual{margin-bottom:22px}
+  .qhead{display:flex;align-items:baseline;gap:9px;margin:2px 2px 11px}
+  .qhead h3{font-size:14px;font-weight:800;margin:0}
+  .qhead .cnt{font-size:11.5px;color:var(--muted-2);font-weight:700}
+  .qgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+  @media(min-width:560px){.qgrid{grid-template-columns:repeat(3,1fr)}}
+  @media(min-width:880px){.qgrid{grid-template-columns:repeat(4,1fr)}}
+  .qchip{display:flex;align-items:center;gap:7px;background:#0c1838;border:1px solid var(--line-2);border-radius:9px;padding:7px 9px;min-width:0}
+  .qchip .fl{font-size:15px;flex:none}
+  .qchip .gl{font-size:9.5px;font-weight:900;color:var(--muted-2);flex:none;width:11px;text-align:center}
+  .qchip .nm{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+  .qchip .ow{width:7px;height:7px;border-radius:50%;flex:none}
+  .qchip .bd{margin-left:auto;font-size:9.5px;font-weight:800;border-radius:999px;padding:2px 7px;flex:none;letter-spacing:.04em}
+  .qchip .bd.fix{background:var(--accent);color:#06231a}
+  .qchip .bd.prov{border:1px solid var(--line);color:var(--muted)}
+  .qchip.third{border-color:rgba(255,206,92,.32)}
+  .koempty{background:var(--card);border:1px dashed var(--line);border-radius:12px;padding:20px 16px;text-align:center;color:var(--muted-2);font-size:12.5px;line-height:1.6}
+  .koround{margin-bottom:16px}
+  .korhead{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.08em;margin:0 2px 8px;display:flex;align-items:center;gap:8px}
+  .korhead::after{content:"";flex:1;height:1px;background:var(--line)}
+  .korhead .rc{font-size:10px;color:var(--muted-2);font-weight:700}
+
   @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -173,6 +197,7 @@
     <button role="tab" aria-selected="true"  data-tab="survive">生き残り</button>
     <button role="tab" aria-selected="false" data-tab="groups">グループ</button>
     <button role="tab" aria-selected="false" data-tab="results">結果・日程</button>
+    <button role="tab" aria-selected="false" data-tab="knockout">決勝T</button>
   </nav>
 
   <section id="survive" role="tabpanel">
@@ -186,6 +211,10 @@
   <section id="results" role="tabpanel" hidden>
     <div class="secttl"><h2>結果・日程</h2><span class="hint">日付は現地基準</span></div>
     <div id="mdays"></div>
+  </section>
+  <section id="knockout" role="tabpanel" hidden>
+    <div class="secttl"><h2>決勝トーナメント</h2><span class="hint">確定＝公式突破／暫定＝現順位での見込み</span></div>
+    <div id="kobody"></div>
   </section>
 
   <details class="note">
@@ -268,6 +297,8 @@ const FALLBACK = {
 };
 
 const GROUPS=["A","B","C","D","E","F","G","H","I","J","K","L"];
+const KO_ROUNDS=[["R32","ラウンド32"],["R16","ラウンド16"],["QF","準々決勝"],["SF","準決勝"],["3rd","3位決定戦"],["FIN","決勝"]];
+const KO_KEYS=new Set(KO_ROUNDS.map(r=>r[0]));
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 function computeStats(TEAMS,MATCHES){
@@ -280,6 +311,35 @@ function computeStats(TEAMS,MATCHES){
   });
   Object.keys(st).forEach(k=>st[k].gd=st[k].gf-st[k].ga);
   return st;
+}
+
+/* グループ順位から進出見込みを算出（上位2＋3位上位8）。確定は status==="advanced" 側で判定。 */
+function computeQualified(TEAMS,ST){
+  const cmp=(x,y)=>ST[y].pts-ST[x].pts||ST[y].gd-ST[x].gd||ST[y].gf-ST[x].gf||TEAMS[x].seed-TEAMS[y].seed;
+  const top2=new Set(),thirds=[];
+  GROUPS.forEach(g=>{
+    const arr=Object.keys(TEAMS).filter(k=>TEAMS[k].group===g).sort(cmp);
+    if(arr[0])top2.add(arr[0]); if(arr[1])top2.add(arr[1]); if(arr[2])thirds.push(arr[2]);
+  });
+  thirds.sort(cmp);
+  const best3=new Set(thirds.slice(0,8));
+  return {top2,best3};
+}
+
+/* ノックアウト1試合の行（結果タブと同じ見た目／グループ記号欄は空） */
+function koRow(m,TEAMS,ownerOf,disp){
+  const th=TEAMS[m.h],ta=TEAMS[m.a];
+  const fh=th?th.flag:"🏳️",fa=ta?ta.flag:"🏳️";
+  const oh=ownerOf[m.h],oa=ownerOf[m.a];
+  let sc;
+  if(m.played){sc=`<span class="${m.hs>m.as?'win-n':''}">${m.hs}</span> - <span class="${m.as>m.hs?'win-n':''}">${m.as}</span>`;}
+  else sc=`<span class="tbd">${esc(m.d||'予定')}</span>`;
+  return `<div class="mrow ${m.played?'':'pending'}"><span class="glab"></span>
+    <span class="side"><span class="fl">${fh}</span><span class="nm">${esc(disp(m.h))}</span>
+      <span class="ow" style="background:${oh?oh.color:'#888'}"></span></span>
+    <span class="score ${m.played?'':'tbd'}">${sc}</span>
+    <span class="side away"><span class="ow" style="background:${oa?oa.color:'#888'}"></span>
+      <span class="nm">${esc(disp(m.a))}</span><span class="fl">${fa}</span></span></div>`;
 }
 
 function render(DATA,isLive){
@@ -364,6 +424,44 @@ function render(DATA,isLive){
     return `<div class="daygrp"><div class="dayttl">${esc(d)}</div><div class="mlist">${rows}</div></div>`;
   }).join("");
 
+  // knockout / 決勝トーナメント
+  const QU=computeQualified(TEAMS,ST);
+  const qList=[];
+  Object.keys(TEAMS).forEach(k=>{
+    const t=TEAMS[k]; if(t.status==="eliminated") return;
+    const confirmed=t.status==="advanced";
+    const prov=QU.top2.has(k)||QU.best3.has(k);
+    if(!confirmed && !prov) return;
+    qList.push({k,confirmed,third:QU.best3.has(k)&&!QU.top2.has(k)});
+  });
+  qList.sort((a,b)=>(b.confirmed-a.confirmed)
+    ||TEAMS[a.k].group.localeCompare(TEAMS[b.k].group)
+    ||ST[b.k].pts-ST[a.k].pts||ST[b.k].gd-ST[a.k].gd||TEAMS[a.k].seed-TEAMS[b.k].seed);
+  const confCount=qList.filter(x=>x.confirmed).length;
+  const qChips=qList.map(x=>{const t=TEAMS[x.k],o=ownerOf[x.k];
+    return `<div class="qchip ${x.third?'third':''}"><span class="fl">${t.flag}</span>
+      <span class="gl">${t.group}</span><span class="nm">${esc(disp(x.k))}</span>
+      <span class="ow" style="background:${o?o.color:'#888'}"></span>
+      <span class="bd ${x.confirmed?'fix':'prov'}">${x.confirmed?'確定':'暫定'}</span></div>`;
+  }).join("");
+  const qualBlock=`<div class="koqual"><div class="qhead"><h3>進出チーム</h3>
+    <span class="cnt">確定 ${confCount} / 32${qList.length>confCount?`（暫定含む ${qList.length}）`:''}</span></div>
+    ${qList.length?`<div class="qgrid">${qChips}</div>`
+      :`<div class="koempty">まだ進出チームがありません。<br>グループステージが進むとここに見込みチームが表示されます。</div>`}</div>`;
+
+  const koMatches=MATCHES.filter(m=>KO_KEYS.has(m.g));
+  let bracketBlock;
+  if(!koMatches.length){
+    bracketBlock=`<div class="koempty">決勝トーナメントの組み合わせは、グループステージ終了後にFIFA公式で確定し次第ここに表示されます。</div>`;
+  }else{
+    bracketBlock=KO_ROUNDS.map(([key,label])=>{
+      const ms=koMatches.filter(m=>m.g===key); if(!ms.length) return "";
+      const rows=ms.map(m=>koRow(m,TEAMS,ownerOf,disp)).join("");
+      return `<div class="koround"><div class="korhead">${label}<span class="rc">${ms.length}</span></div><div class="mlist">${rows}</div></div>`;
+    }).join("");
+  }
+  document.getElementById("kobody").innerHTML=qualBlock+bracketBlock;
+
   document.getElementById("foot").innerHTML=
     `データ更新: ${esc(META.asOf||'-')} ／ 自動更新 9:00・17:00 JST（GitHub Actions × Sonnet）<br>`+
     `順位の同点処理は「勝点→得失点→総得点→シード」で簡易表示。`;
@@ -372,7 +470,7 @@ function render(DATA,isLive){
 /* tabs (一度だけ設定) */
 (function(){
   const btns=[...document.querySelectorAll('nav.tabs button')];
-  const secs={survive:document.getElementById('survive'),groups:document.getElementById('groups'),results:document.getElementById('results')};
+  const secs={survive:document.getElementById('survive'),groups:document.getElementById('groups'),results:document.getElementById('results'),knockout:document.getElementById('knockout')};
   btns.forEach(b=>b.addEventListener('click',()=>{
     btns.forEach(x=>x.setAttribute('aria-selected',x===b));
     Object.entries(secs).forEach(([k,el])=>el.hidden=(k!==b.dataset.tab));
