@@ -20,7 +20,7 @@
     "ポルトガル": { "flag": "🇵🇹", "group": "K", "seed": 5,  "status": "alive" },
     "クロアチア": { "flag": "🇭🇷", "group": "L", "seed": 11, "status": "alive" },
     "オーストラリア": { "flag": "🇦🇺", "group": "D", "seed": 24, "status": "alive" },
-    "ノルウェー": { "flag": "🇳🇴", "group": "I", "seed": 28, "status": "alive" },
+    "ノルウェー": { "flag": "🇳🇴", "group": "I", "seed": 28, "status": "advanced" },
     "チュニジア": { "flag": "🇹🇳", "group": "F", "seed": 35, "status": "alive" },
     "ガーナ": { "flag": "🇬🇭", "group": "L", "seed": 45, "status": "alive" },
     "アルゼンチン": { "flag": "🇦🇷", "group": "J", "seed": 3,  "status": "alive" },
@@ -52,7 +52,7 @@
     "スイス": { "flag": "🇨🇭", "group": "B", "seed": 18, "status": "alive" },
     "パナマ": { "flag": "🇵🇦", "group": "L", "seed": 29, "status": "alive" },
     "カタール": { "flag": "🇶🇦", "group": "B", "seed": 38, "status": "alive" },
-    "ヨルダン": { "flag": "🇯🇴", "group": "J", "seed": 43, "status": "alive" },
+    "ヨルダン": { "flag": "🇯🇴", "group": "J", "seed": 43, "status": "eliminated" },
     "スペイン": { "flag": "🇪🇸", "group": "H", "seed": 2,  "status": "alive" },
     "ドイツ": { "flag": "🇩🇪", "group": "E", "seed": 10, "status": "alive" },
     "エクアドル": { "flag": "🇪🇨", "group": "E", "seed": 21, "status": "alive" },
@@ -101,6 +101,9 @@
     { "g": "H", "h": "スペイン", "a": "サウジアラビア", "hs": 4, "as": 0, "d": "6/21", "played": true },
     { "g": "H", "h": "ウルグアイ", "a": "カボベルデ", "hs": 2, "as": 2, "d": "6/21", "played": true },
     { "g": "G", "h": "ニュージーランド", "a": "エジプト", "hs": 1, "as": 3, "d": "6/21", "played": true },
-    { "g": "J", "h": "アルゼンチン", "a": "オーストリア", "hs": 2, "as": 0, "d": "6/22", "played": true }
+    { "g": "J", "h": "アルゼンチン", "a": "オーストリア", "hs": 2, "as": 0, "d": "6/22", "played": true },
+    { "g": "I", "h": "フランス", "a": "イラク", "hs": 3, "as": 0, "d": "6/22", "played": true },
+    { "g": "I", "h": "ノルウェー", "a": "セネガル", "hs": 3, "as": 2, "d": "6/22", "played": true },
+    { "g": "J", "h": "ヨルダン", "a": "アルジェリア", "hs": 1, "as": 2, "d": "6/22", "played": true }
   ]
 }
