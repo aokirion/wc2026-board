@@ -161,6 +161,10 @@
   .qchip{display:flex;align-items:center;gap:7px;background:#0c1838;border:1px solid var(--line-2);border-radius:9px;padding:7px 9px;min-width:0}
   .qchip .fl{font-size:15px;flex:none}
   .qchip .gl{font-size:9.5px;font-weight:900;color:var(--muted-2);flex:none;width:11px;text-align:center}
+  .qchip .rk{font-size:9px;font-weight:800;border-radius:4px;padding:1px 4px;flex:none}
+  .qchip .rk.r1{background:var(--gold);color:#3a2a00}
+  .qchip .rk.r2{background:rgba(200,212,235,.9);color:#16223c}
+  .qchip .rk.r3{background:rgba(255,206,92,.28);color:var(--gold)}
   .qchip .nm{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
   .qchip .ow{width:7px;height:7px;border-radius:50%;flex:none}
   .qchip .bd{margin-left:auto;font-size:9.5px;font-weight:800;border-radius:999px;padding:2px 7px;flex:none;letter-spacing:.04em}
@@ -319,6 +323,8 @@ const FALLBACK = {
 const GROUPS=["A","B","C","D","E","F","G","H","I","J","K","L"];
 const KO_ROUNDS=[["R32","ラウンド32"],["R16","ラウンド16"],["QF","準々決勝"],["SF","準決勝"],["3rd","3位決定戦"],["FIN","決勝"]];
 const KO_KEYS=new Set(KO_ROUNDS.map(r=>r[0]));
+/* グループ最終順位を 1/2/3 に正規化（不正値・未設定は null）。表示とソートで共用。 */
+const validRank=r=>{const n=Number(r);return [1,2,3].includes(n)?n:null;};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 function computeStats(TEAMS,MATCHES){
@@ -457,11 +463,13 @@ function render(DATA,isLive){
   });
   qList.sort((a,b)=>(b.confirmed-a.confirmed)
     ||TEAMS[a.k].group.localeCompare(TEAMS[b.k].group)
+    ||((validRank(TEAMS[a.k].rank)||9)-(validRank(TEAMS[b.k].rank)||9))
     ||ST[b.k].pts-ST[a.k].pts||ST[b.k].gd-ST[a.k].gd||TEAMS[a.k].seed-TEAMS[b.k].seed);
   const confCount=qList.filter(x=>x.confirmed).length;
   const qChips=qList.map(x=>{const t=TEAMS[x.k],o=ownerOf[x.k];
+    const r=validRank(t.rank), rk=r?`<span class="rk r${r}">${r}位</span>`:'';
     return `<div class="qchip ${x.third?'third':''}"><span class="fl">${t.flag}</span>
-      <span class="gl">${t.group}</span><span class="nm">${esc(disp(x.k))}</span>
+      <span class="gl">${t.group}</span>${rk}<span class="nm">${esc(disp(x.k))}</span>
       <span class="ow" style="background:${o?o.color:'#888'}"></span>
       <span class="bd ${x.confirmed?'fix':'prov'}">${x.confirmed?'確定':'暫定'}</span></div>`;
   }).join("");
