@@ -1,5 +1,5 @@
 {
-  "meta": { "asOf": "2026/6/23" },
+  "meta": { "asOf": "2026/6/24" },
   "participants": [
     { "no": 1, "name": "青木",   "color": "#38bdf8", "teams": ["モロッコ","ベルギー","トルコ","カナダ","南アフリカ","キュラソー"] },
     { "no": 2, "name": "薮野",   "color": "#fb923c", "teams": ["ポルトガル","クロアチア","オーストラリア","ノルウェー","チュニジア","ガーナ"] },
@@ -24,7 +24,7 @@
     "チュニジア": { "flag": "🇹🇳", "group": "F", "seed": 35, "status": "eliminated" },
     "ガーナ": { "flag": "🇬🇭", "group": "L", "seed": 45, "status": "alive" },
     "アルゼンチン": { "flag": "🇦🇷", "group": "J", "seed": 3,  "status": "advanced" },
-    "コロンビア": { "flag": "🇨🇴", "group": "K", "seed": 12, "status": "alive" },
+    "コロンビア": { "flag": "🇨🇴", "group": "K", "seed": 12, "status": "advanced" },
     "オーストリア": { "flag": "🇦🇹", "group": "J", "seed": 22, "status": "alive" },
     "アルジェリア": { "flag": "🇩🇿", "group": "J", "seed": 25, "status": "alive" },
     "パラグアイ": { "flag": "🇵🇾", "group": "D", "seed": 33, "status": "alive" },
@@ -50,7 +50,7 @@
     "オランダ": { "flag": "🇳🇱", "group": "F", "seed": 7,  "status": "alive" },
     "アメリカ": { "flag": "🇺🇸", "group": "D", "seed": 15, "status": "advanced" },
     "スイス": { "flag": "🇨🇭", "group": "B", "seed": 18, "status": "alive" },
-    "パナマ": { "flag": "🇵🇦", "group": "L", "seed": 29, "status": "alive" },
+    "パナマ": { "flag": "🇵🇦", "group": "L", "seed": 29, "status": "eliminated" },
     "カタール": { "flag": "🇶🇦", "group": "B", "seed": 38, "status": "alive" },
     "ヨルダン": { "flag": "🇯🇴", "group": "J", "seed": 43, "status": "eliminated" },
     "スペイン": { "flag": "🇪🇸", "group": "H", "seed": 2,  "status": "alive" },
@@ -104,6 +104,10 @@
     { "g": "J", "h": "アルゼンチン", "a": "オーストリア", "hs": 2, "as": 0, "d": "6/22", "played": true },
     { "g": "I", "h": "フランス", "a": "イラク", "hs": 3, "as": 0, "d": "6/22", "played": true },
     { "g": "I", "h": "ノルウェー", "a": "セネガル", "hs": 3, "as": 2, "d": "6/22", "played": true },
-    { "g": "J", "h": "ヨルダン", "a": "アルジェリア", "hs": 1, "as": 2, "d": "6/22", "played": true }
+    { "g": "J", "h": "ヨルダン", "a": "アルジェリア", "hs": 1, "as": 2, "d": "6/22", "played": true },
+    { "g": "L", "h": "イングランド", "a": "ガーナ", "hs": 0, "as": 0, "d": "6/23", "played": true },
+    { "g": "L", "h": "パナマ", "a": "クロアチア", "hs": 0, "as": 1, "d": "6/23", "played": true },
+    { "g": "K", "h": "ポルトガル", "a": "ウズベキスタン", "hs": 5, "as": 0, "d": "6/23", "played": true },
+    { "g": "K", "h": "コロンビア", "a": "コンゴ民主共和国", "hs": 1, "as": 0, "d": "6/23", "played": true }
   ]
 }
