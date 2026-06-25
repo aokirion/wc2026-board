@@ -255,7 +255,7 @@
   <details class="note">
     <summary><span class="ic">⟳</span>更新のしくみ</summary>
     <div class="notebody">
-      このボードは毎日 <b>9:00 / 17:00（JST）</b> に GitHub Actions が <code>data.json</code> を自動更新します（モデルは Sonnet）。
+      このボードは <b>1日2回（朝9時・夕17時めど・JST）</b> に <code>data.json</code> を手動更新しています（FIFA公式スコアを確認して反映）。
       手動で直したい場合は <code>data.json</code> を編集すれば反映されます。順位・勝点・得失点・生存数はすべて自動計算です。
     </div>
   </details>
@@ -474,7 +474,7 @@ function render(DATA,isLive){
   const played=MATCHES.filter(m=>m.played).length;
   const elim=Object.values(TEAMS).filter(t=>t.status==="eliminated").length;
   const livePill=isLive
-    ? `<span class="pill live"><i class="ld"></i>自動更新 ON</span>`
+    ? `<span class="pill live"><i class="ld"></i>ライブデータ</span>`
     : `<span class="pill snap">スナップショット表示</span>`;
   document.getElementById("meta").innerHTML=
     `<span class="pill">最終更新 <b>${esc(META.asOf||"-")}</b></span>`+livePill+
@@ -600,7 +600,7 @@ function render(DATA,isLive){
   requestAnimationFrame(()=>{ if(!document.getElementById("knockout").hidden) drawKOLines(); });
 
   document.getElementById("foot").innerHTML=
-    `データ更新: ${esc(META.asOf||'-')} ／ 自動更新 9:00・17:00 JST（GitHub Actions × Sonnet）<br>`+
+    `データ更新: ${esc(META.asOf||'-')} ／ 手動更新（朝9時・夕17時めど・FIFA公式スコアを反映）<br>`+
     `順位の同点処理は「勝点→得失点→総得点→シード」で簡易表示。`;
 }
 
