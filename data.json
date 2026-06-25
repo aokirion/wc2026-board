@@ -32,12 +32,12 @@
     "ブラジル": { "flag": "🇧🇷", "group": "C", "seed": 6,  "status": "advanced", "rank": 1 },
     "セネガル": { "flag": "🇸🇳", "group": "I", "seed": 13, "status": "alive" },
     "日本": { "flag": "🇯🇵", "group": "F", "seed": 17, "status": "alive" },
-    "チェコ": { "flag": "🇨🇿", "group": "A", "seed": 32, "status": "alive" },
+    "チェコ": { "flag": "🇨🇿", "group": "A", "seed": 32, "status": "eliminated" },
     "スコットランド": { "flag": "🏴󠁧󠁢󠁳󠁣󠁴󠁿", "group": "C", "seed": 34, "status": "alive", "rank": 3 },
     "ハイチ": { "flag": "🇭🇹", "group": "C", "seed": 47, "status": "eliminated" },
     "フランス": { "flag": "🇫🇷", "group": "I", "seed": 1,  "status": "advanced" },
     "ウルグアイ": { "flag": "🇺🇾", "group": "H", "seed": 16, "status": "alive" },
-    "韓国": { "flag": "🇰🇷", "group": "A", "seed": 23, "status": "alive" },
+    "韓国": { "flag": "🇰🇷", "group": "A", "seed": 23, "status": "alive", "rank": 3 },
     "スウェーデン": { "flag": "🇸🇪", "group": "F", "seed": 31, "status": "alive" },
     "ウズベキスタン": { "flag": "🇺🇿", "group": "K", "seed": 37, "status": "alive" },
     "ボスニア": { "flag": "🇧🇦", "group": "B", "seed": 42, "status": "alive" },
@@ -111,6 +111,8 @@
     { "g": "K", "h": "コロンビア", "a": "コンゴ民主共和国", "hs": 1, "as": 0, "d": "6/23", "played": true },
     { "g": "B", "h": "スイス", "a": "カナダ", "hs": 2, "as": 1, "d": "6/24", "played": true },
     { "g": "C", "h": "スコットランド", "a": "ブラジル", "hs": 0, "as": 3, "d": "6/24", "played": true },
-    { "g": "C", "h": "モロッコ", "a": "ハイチ", "hs": 4, "as": 2, "d": "6/24", "played": true }
+    { "g": "C", "h": "モロッコ", "a": "ハイチ", "hs": 4, "as": 2, "d": "6/24", "played": true },
+    { "g": "A", "h": "チェコ", "a": "メキシコ", "hs": 0, "as": 3, "d": "6/24", "played": true },
+    { "g": "A", "h": "南アフリカ", "a": "韓国", "hs": 1, "as": 0, "d": "6/24", "played": true }
   ]
 }
