@@ -179,11 +179,13 @@
   .b3rd{max-width:240px}
 
   /* bracket（トーナメント表） */
-  .bracket{display:flex;align-items:stretch;gap:16px;overflow-x:auto;padding:2px 2px 12px;-webkit-overflow-scrolling:touch}
+  .bracket{position:relative;display:flex;align-items:stretch;gap:16px;overflow-x:auto;padding:2px 2px 12px;-webkit-overflow-scrolling:touch}
+  .ko-svg{position:absolute;top:0;left:0;z-index:0;pointer-events:none;overflow:visible}
+  .ko-svg polyline{fill:none;stroke:var(--line);stroke-width:1.5;stroke-linejoin:round}
   .bcol{display:flex;flex-direction:column;min-width:172px;flex:none}
   .bcol-h{flex:none;font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.08em;text-align:center;padding:5px 0;margin-bottom:6px;border-bottom:1px solid var(--line-2)}
   .bcol-b{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:10px;min-height:120px}
-  .bx{background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .bx{position:relative;z-index:1;background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid var(--line);border-radius:10px;overflow:hidden}
   .bx.pending{opacity:.72}
   .bxr{display:flex;align-items:center;gap:7px;padding:7px 9px;min-width:0}
   .bxr+.bxr{border-top:1px solid var(--line-2)}
@@ -383,7 +385,37 @@ function skelBox(num,maps,TEAMS,ownerOf,disp){
     return phRow('勝者',true);
   };
   const foot=num===104?`<div class="bxd">🏆 優勝</div>`:'';
-  return `<div class="bx${num===104?' fin':''}">${side(node.a)}${side(node.b)}${foot}</div>`;
+  return `<div class="bx${num===104?' fin':''}" data-m="${num}">${side(node.a)}${side(node.b)}${foot}</div>`;
+}
+
+/* スケルトン・ブラケットの罫線（コネクター）を SVG で描画。ボックスの実位置を測るので
+   動的な高さ/横スクロールでも正確。各試合のフィーダー(勝者元)から当該試合へ線を引く。 */
+function drawKOLines(){
+  const wrap=document.querySelector('#knockout .bracket');
+  if(!wrap) return;
+  const old=wrap.querySelector('.ko-svg'); if(old) old.remove();
+  const box=n=>wrap.querySelector(`.bx[data-m="${n}"]`);
+  const probe=box(73);
+  if(!probe||!probe.offsetWidth) return; // 非表示/未レイアウト時はスキップ
+  const NS='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('class','ko-svg');
+  svg.setAttribute('width',wrap.scrollWidth);
+  svg.setAttribute('height',wrap.scrollHeight);
+  const seg=(fx,fy,tx,ty)=>{const mx=(fx+tx)/2;
+    const p=document.createElementNS(NS,'polyline');
+    p.setAttribute('points',`${fx},${fy} ${mx},${fy} ${mx},${ty} ${tx},${ty}`);
+    svg.appendChild(p);};
+  Object.keys(KO_BRACKET).forEach(s=>{
+    const num=+s, tb=box(num); if(!tb) return;
+    const node=KO_BRACKET[num];
+    [node.a,node.b].forEach(sd=>{
+      const ref=sd.w!=null?sd.w:(sd.l!=null?sd.l:null); if(ref==null) return;
+      const fb=box(ref); if(!fb) return;
+      seg(fb.offsetLeft+fb.offsetWidth, fb.offsetTop+fb.offsetHeight/2, tb.offsetLeft, tb.offsetTop+tb.offsetHeight/2);
+    });
+  });
+  wrap.insertBefore(svg, wrap.firstChild);
 }
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
@@ -565,6 +597,7 @@ function render(DATA,isLive){
     bracketBlock=`<div class="bracket">${cols}</div>${thirdBlock}`;
   }
   document.getElementById("kobody").innerHTML=qualBlock+bracketBlock;
+  requestAnimationFrame(()=>{ if(!document.getElementById("knockout").hidden) drawKOLines(); });
 
   document.getElementById("foot").innerHTML=
     `データ更新: ${esc(META.asOf||'-')} ／ 自動更新 9:00・17:00 JST（GitHub Actions × Sonnet）<br>`+
@@ -579,7 +612,11 @@ function render(DATA,isLive){
     btns.forEach(x=>x.setAttribute('aria-selected',x===b));
     Object.entries(secs).forEach(([k,el])=>el.hidden=(k!==b.dataset.tab));
     window.scrollTo({top:0,behavior:'smooth'});
+    if(b.dataset.tab==='knockout') requestAnimationFrame(drawKOLines);
   }));
+  let rT; window.addEventListener('resize',()=>{clearTimeout(rT);rT=setTimeout(()=>{
+    if(!document.getElementById('knockout').hidden) drawKOLines();
+  },150);});
 })();
 
 /* data.json を読み込み、失敗時はフォールバック */
