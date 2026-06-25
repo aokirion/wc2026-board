@@ -196,6 +196,12 @@
   .bxr .pk{font-size:8.5px;font-weight:800;color:var(--accent);margin-left:3px;vertical-align:super}
   .bxr.lose{opacity:.55}
   .bxd{font-size:9.5px;color:var(--muted-2);text-align:center;padding:3px 0;border-top:1px solid var(--line-2)}
+  .konote{font-size:11.5px;color:var(--muted-2);line-height:1.65;margin:0 2px 14px}
+  .konote b{color:var(--muted);font-weight:800}
+  .r32grid{display:grid;grid-template-columns:1fr;gap:10px}
+  @media(min-width:640px){.r32grid{grid-template-columns:1fr 1fr}}
+  .bxr.ph{min-height:31px}
+  .bxr .phl{font-size:11.5px;font-weight:700;color:var(--muted-2);letter-spacing:.02em}
 
   @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
@@ -325,6 +331,50 @@ const KO_ROUNDS=[["R32","ラウンド32"],["R16","ラウンド16"],["QF","準々
 const KO_KEYS=new Set(KO_ROUNDS.map(r=>r[0]));
 /* グループ最終順位を 1/2/3 に正規化（不正値・未設定は null）。表示とソートで共用。 */
 const validRank=r=>{const n=Number(r);return [1,2,3].includes(n)?n:null;};
+
+/* 公式ラウンド32構造（FIFA 2026 / 16試合）。W=グループ1位, R=グループ2位, T=3位通過枠。
+   data.json に実際の R32 試合が入るまで、確定順位からスロットを自動充填して表示する。 */
+const R32_STRUCTURE=[
+  {s1:{t:'R',g:'A'},        s2:{t:'R',g:'B'}},
+  {s1:{t:'W',g:'C'},        s2:{t:'R',g:'F'}},
+  {s1:{t:'W',g:'E'},        s2:{t:'T',gs:'ABCDF'}},
+  {s1:{t:'W',g:'F'},        s2:{t:'R',g:'C'}},
+  {s1:{t:'R',g:'E'},        s2:{t:'R',g:'I'}},
+  {s1:{t:'W',g:'I'},        s2:{t:'T',gs:'CDFGH'}},
+  {s1:{t:'W',g:'A'},        s2:{t:'T',gs:'CEFHI'}},
+  {s1:{t:'W',g:'L'},        s2:{t:'T',gs:'EHIJK'}},
+  {s1:{t:'W',g:'G'},        s2:{t:'T',gs:'AEHIJ'}},
+  {s1:{t:'W',g:'D'},        s2:{t:'T',gs:'BEFIJ'}},
+  {s1:{t:'W',g:'H'},        s2:{t:'R',g:'J'}},
+  {s1:{t:'R',g:'K'},        s2:{t:'R',g:'L'}},
+  {s1:{t:'W',g:'B'},        s2:{t:'T',gs:'EFGIJ'}},
+  {s1:{t:'R',g:'D'},        s2:{t:'R',g:'G'}},
+  {s1:{t:'W',g:'J'},        s2:{t:'R',g:'H'}},
+  {s1:{t:'W',g:'K'},        s2:{t:'T',gs:'DEIJL'}}
+];
+
+/* 確定順位から R32 スロットを解決。未確定はスロット記号（1F/2J/3位…）のプレースホルダ。 */
+function buildR32Skeleton(TEAMS){
+  const win={}, run={};
+  Object.keys(TEAMS).forEach(k=>{const r=validRank(TEAMS[k].rank); if(r===1)win[TEAMS[k].group]=k; else if(r===2)run[TEAMS[k].group]=k;});
+  const resolve=s=>{
+    if(s.t==='W') return win[s.g]?{team:win[s.g]}:{label:'1'+s.g};
+    if(s.t==='R') return run[s.g]?{team:run[s.g]}:{label:'2'+s.g};
+    return {label:'3位 '+s.gs.split('').join('/')};
+  };
+  return R32_STRUCTURE.map(m=>({s1:resolve(m.s1), s2:resolve(m.s2)}));
+}
+
+/* R32スケルトンの1試合ボックス（確定チーム or スロット記号） */
+function r32Box(m,TEAMS,ownerOf,disp){
+  const side=s=>{
+    if(s.team){const t=TEAMS[s.team],o=ownerOf[s.team];
+      return `<div class="bxr"><span class="fl">${t?t.flag:'🏳️'}</span>`+
+        `<span class="ow" style="background:${o?o.color:'#888'}"></span><span class="nm">${esc(disp(s.team))}</span></div>`;}
+    return `<div class="bxr ph"><span class="phl">${esc(s.label)}</span></div>`;
+  };
+  return `<div class="bx">${side(m.s1)}${side(m.s2)}</div>`;
+}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 function computeStats(TEAMS,MATCHES){
@@ -481,7 +531,11 @@ function render(DATA,isLive){
   const koMatches=MATCHES.filter(m=>KO_KEYS.has(m.g));
   let bracketBlock;
   if(!koMatches.length){
-    bracketBlock=`<div class="koempty">決勝トーナメントの組み合わせは、グループステージ終了後にFIFA公式で確定し次第ここに表示されます。</div>`;
+    // まだ実カードが無い → 公式R32構造に確定順位を自動充填したスケルトンを表示
+    const skel=buildR32Skeleton(TEAMS);
+    const boxes=skel.map(m=>r32Box(m,TEAMS,ownerOf,disp)).join("");
+    bracketBlock=`<div class="konote">公式のラウンド32組み合わせです。グループ順位が確定したチームから自動配置されます（<b>1F</b>・<b>2J</b> 等は未確定スロット、<b>3位 …</b> は3位通過枠）。全グループ終了後、実際の対戦カードとスコアがブラケット表示に切り替わります。</div>
+      <div class="koround"><div class="korhead">ラウンド32（組み合わせ）<span class="rc">16</span></div><div class="r32grid">${boxes}</div></div>`;
   }else{
     // 本選ラウンドを列にして左→右に配置（試合数が半減してトーナメント表の形になる）
     const COLS=[["R32","ラウンド32"],["R16","ラウンド16"],["QF","準々決勝"],["SF","準決勝"],["FIN","決勝"]];
