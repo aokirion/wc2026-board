@@ -15,7 +15,7 @@
     "ベルギー": { "flag": "🇧🇪", "group": "G", "seed": 9,  "status": "alive" },
     "トルコ": { "flag": "🇹🇷", "group": "D", "seed": 20, "status": "eliminated" },
     "カナダ": { "flag": "🇨🇦", "group": "B", "seed": 27, "status": "advanced", "rank": 2 },
-    "南アフリカ": { "flag": "🇿🇦", "group": "A", "seed": 40, "status": "alive" },
+    "南アフリカ": { "flag": "🇿🇦", "group": "A", "seed": 40, "status": "advanced", "rank": 2 },
     "キュラソー": { "flag": "🇨🇼", "group": "E", "seed": 46, "status": "alive" },
     "ポルトガル": { "flag": "🇵🇹", "group": "K", "seed": 5,  "status": "alive" },
     "クロアチア": { "flag": "🇭🇷", "group": "L", "seed": 11, "status": "alive" },
