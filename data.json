@@ -1,5 +1,5 @@
 {
-  "meta": { "asOf": "2026/6/25" },
+  "meta": { "asOf": "2026/6/26" },
   "participants": [
     { "no": 1, "name": "青木",   "color": "#38bdf8", "teams": ["モロッコ","ベルギー","トルコ","カナダ","南アフリカ","キュラソー"] },
     { "no": 2, "name": "薮野",   "color": "#fb923c", "teams": ["ポルトガル","クロアチア","オーストラリア","ノルウェー","チュニジア","ガーナ"] },
@@ -16,7 +16,7 @@
     "トルコ": { "flag": "🇹🇷", "group": "D", "seed": 20, "status": "eliminated" },
     "カナダ": { "flag": "🇨🇦", "group": "B", "seed": 27, "status": "advanced", "rank": 2 },
     "南アフリカ": { "flag": "🇿🇦", "group": "A", "seed": 40, "status": "advanced", "rank": 2 },
-    "キュラソー": { "flag": "🇨🇼", "group": "E", "seed": 46, "status": "alive" },
+    "キュラソー": { "flag": "🇨🇼", "group": "E", "seed": 46, "status": "eliminated" },
     "ポルトガル": { "flag": "🇵🇹", "group": "K", "seed": 5,  "status": "alive" },
     "クロアチア": { "flag": "🇭🇷", "group": "L", "seed": 11, "status": "alive" },
     "オーストラリア": { "flag": "🇦🇺", "group": "D", "seed": 24, "status": "alive" },
@@ -44,7 +44,7 @@
     "イングランド": { "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "group": "L", "seed": 4,  "status": "alive" },
     "メキシコ": { "flag": "🇲🇽", "group": "A", "seed": 14, "status": "advanced", "rank": 1 },
     "イラン": { "flag": "🇮🇷", "group": "G", "seed": 19, "status": "alive" },
-    "コートジボワール": { "flag": "🇨🇮", "group": "E", "seed": 30, "status": "alive" },
+    "コートジボワール": { "flag": "🇨🇮", "group": "E", "seed": 30, "status": "advanced", "rank": 2 },
     "コンゴ民主共和国": { "flag": "🇨🇩", "group": "K", "seed": 36, "status": "alive", "name": "DRコンゴ" },
     "カボベルデ": { "flag": "🇨🇻", "group": "H", "seed": 44, "status": "alive" },
     "オランダ": { "flag": "🇳🇱", "group": "F", "seed": 7,  "status": "alive" },
@@ -55,7 +55,7 @@
     "ヨルダン": { "flag": "🇯🇴", "group": "J", "seed": 43, "status": "eliminated" },
     "スペイン": { "flag": "🇪🇸", "group": "H", "seed": 2,  "status": "alive" },
     "ドイツ": { "flag": "🇩🇪", "group": "E", "seed": 10, "status": "advanced", "rank": 1 },
-    "エクアドル": { "flag": "🇪🇨", "group": "E", "seed": 21, "status": "alive" },
+    "エクアドル": { "flag": "🇪🇨", "group": "E", "seed": 21, "status": "alive", "rank": 3 },
     "エジプト": { "flag": "🇪🇬", "group": "G", "seed": 26, "status": "alive" },
     "イラク": { "flag": "🇮🇶", "group": "I", "seed": 39, "status": "alive" },
     "サウジアラビア": { "flag": "🇸🇦", "group": "H", "seed": 41, "status": "alive", "name": "サウジ" }
@@ -113,6 +113,8 @@
     { "g": "C", "h": "スコットランド", "a": "ブラジル", "hs": 0, "as": 3, "d": "6/24", "played": true },
     { "g": "C", "h": "モロッコ", "a": "ハイチ", "hs": 4, "as": 2, "d": "6/24", "played": true },
     { "g": "A", "h": "チェコ", "a": "メキシコ", "hs": 0, "as": 3, "d": "6/24", "played": true },
-    { "g": "A", "h": "南アフリカ", "a": "韓国", "hs": 1, "as": 0, "d": "6/24", "played": true }
+    { "g": "A", "h": "南アフリカ", "a": "韓国", "hs": 1, "as": 0, "d": "6/24", "played": true },
+    { "g": "E", "h": "エクアドル", "a": "ドイツ", "hs": 2, "as": 1, "d": "6/25", "played": true },
+    { "g": "E", "h": "キュラソー", "a": "コートジボワール", "hs": 0, "as": 2, "d": "6/25", "played": true }
   ]
 }
