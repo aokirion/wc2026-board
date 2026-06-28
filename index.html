@@ -341,14 +341,14 @@ const validRank=r=>{const n=Number(r);return [1,2,3].includes(n)?n:null;};
    R32: W=グループ1位, R=グループ2位, T=3位通過枠。R16以降: {w:n}=試合nの勝者, {l:n}=試合nの敗者。
    data.json に実カードが入るまで、確定順位からスロットを自動充填したツリーを表示する。 */
 const KO_BRACKET={
-  73:{a:{t:'R',g:'A'},b:{t:'R',g:'B'}},      74:{a:{t:'W',g:'E'},b:{t:'T',gs:'ABCDF'}},
+  73:{a:{t:'R',g:'A'},b:{t:'R',g:'B'}},      74:{a:{t:'W',g:'E'},b:{t:'T',gs:'ABCDF',g:'D'}},
   75:{a:{t:'W',g:'F'},b:{t:'R',g:'C'}},      76:{a:{t:'W',g:'C'},b:{t:'R',g:'F'}},
-  77:{a:{t:'W',g:'I'},b:{t:'T',gs:'CDFGH'}}, 78:{a:{t:'R',g:'E'},b:{t:'R',g:'I'}},
-  79:{a:{t:'W',g:'A'},b:{t:'T',gs:'CEFHI'}}, 80:{a:{t:'W',g:'L'},b:{t:'T',gs:'EHIJK'}},
-  81:{a:{t:'W',g:'D'},b:{t:'T',gs:'BEFIJ'}}, 82:{a:{t:'W',g:'G'},b:{t:'T',gs:'AEHIJ'}},
+  77:{a:{t:'W',g:'I'},b:{t:'T',gs:'CDFGH',g:'F'}}, 78:{a:{t:'R',g:'E'},b:{t:'R',g:'I'}},
+  79:{a:{t:'W',g:'A'},b:{t:'T',gs:'CEFHI',g:'E'}}, 80:{a:{t:'W',g:'L'},b:{t:'T',gs:'EHIJK',g:'K'}},
+  81:{a:{t:'W',g:'D'},b:{t:'T',gs:'BEFIJ',g:'B'}}, 82:{a:{t:'W',g:'G'},b:{t:'T',gs:'AEHIJ',g:'I'}},
   83:{a:{t:'R',g:'K'},b:{t:'R',g:'L'}},      84:{a:{t:'W',g:'H'},b:{t:'R',g:'J'}},
-  85:{a:{t:'W',g:'B'},b:{t:'T',gs:'EFGIJ'}}, 86:{a:{t:'W',g:'J'},b:{t:'R',g:'H'}},
-  87:{a:{t:'W',g:'K'},b:{t:'T',gs:'DEIJL'}}, 88:{a:{t:'R',g:'D'},b:{t:'R',g:'G'}},
+  85:{a:{t:'W',g:'B'},b:{t:'T',gs:'EFGIJ',g:'J'}}, 86:{a:{t:'W',g:'J'},b:{t:'R',g:'H'}},
+  87:{a:{t:'W',g:'K'},b:{t:'T',gs:'DEIJL',g:'L'}}, 88:{a:{t:'R',g:'D'},b:{t:'R',g:'G'}},
   89:{a:{w:74},b:{w:77}},  90:{a:{w:73},b:{w:75}},  91:{a:{w:76},b:{w:78}},  92:{a:{w:79},b:{w:80}},
   93:{a:{w:83},b:{w:84}},  94:{a:{w:81},b:{w:82}},  95:{a:{w:86},b:{w:88}},  96:{a:{w:85},b:{w:87}},
   97:{a:{w:89},b:{w:90}},  98:{a:{w:93},b:{w:94}},  99:{a:{w:91},b:{w:92}},  100:{a:{w:95},b:{w:96}},
@@ -366,9 +366,11 @@ const SKEL_COLS=[
 
 /* 確定順位から W=1位/R=2位 を解決するマップ */
 function rankMaps(TEAMS){
-  const win={}, run={};
-  Object.keys(TEAMS).forEach(k=>{const r=validRank(TEAMS[k].rank); if(r===1)win[TEAMS[k].group]=k; else if(r===2)run[TEAMS[k].group]=k;});
-  return {win, run};
+  const win={}, run={}, third={};
+  Object.keys(TEAMS).forEach(k=>{const r=validRank(TEAMS[k].rank); if(r===1)win[TEAMS[k].group]=k;
+    else if(r===2)run[TEAMS[k].group]=k;
+    else if(r===3 && TEAMS[k].status!=='eliminated')third[TEAMS[k].group]=k;});
+  return {win, run, third};
 }
 /* スケルトンの1試合ボックス（確定チーム / スロット記号 / 勝者待ち） */
 function skelBox(num,maps,TEAMS,ownerOf,disp){
@@ -380,7 +382,7 @@ function skelBox(num,maps,TEAMS,ownerOf,disp){
   const side=sd=>{
     if(sd.t==='W'){const k=maps.win[sd.g]; return k?teamRow(k):phRow('1'+sd.g);}
     if(sd.t==='R'){const k=maps.run[sd.g]; return k?teamRow(k):phRow('2'+sd.g);}
-    if(sd.t==='T') return phRow('3位 '+sd.gs.split('').join('/'));
+    if(sd.t==='T'){const k=sd.g?maps.third[sd.g]:null; return k?teamRow(k):phRow('3位 '+sd.gs.split('').join('/'));}
     if(sd.l!=null) return phRow('敗者',true);
     return phRow('勝者',true);
   };
