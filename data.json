@@ -1,5 +1,5 @@
 {
-  "meta": { "asOf": "2026/6/27" },
+  "meta": { "asOf": "2026/6/28" },
   "participants": [
     { "no": 1, "name": "青木",   "color": "#38bdf8", "teams": ["モロッコ","ベルギー","トルコ","カナダ","南アフリカ","キュラソー"] },
     { "no": 2, "name": "薮野",   "color": "#fb923c", "teams": ["ポルトガル","クロアチア","オーストラリア","ノルウェー","チュニジア","ガーナ"] },
@@ -18,11 +18,11 @@
     "南アフリカ": { "flag": "🇿🇦", "group": "A", "seed": 40, "status": "advanced", "rank": 2 },
     "キュラソー": { "flag": "🇨🇼", "group": "E", "seed": 46, "status": "eliminated" },
     "ポルトガル": { "flag": "🇵🇹", "group": "K", "seed": 5,  "status": "alive" },
-    "クロアチア": { "flag": "🇭🇷", "group": "L", "seed": 11, "status": "alive" },
+    "クロアチア": { "flag": "🇭🇷", "group": "L", "seed": 11, "status": "advanced", "rank": 2 },
     "オーストラリア": { "flag": "🇦🇺", "group": "D", "seed": 24, "status": "advanced", "rank": 2 },
     "ノルウェー": { "flag": "🇳🇴", "group": "I", "seed": 28, "status": "advanced", "rank": 2 },
     "チュニジア": { "flag": "🇹🇳", "group": "F", "seed": 35, "status": "eliminated" },
-    "ガーナ": { "flag": "🇬🇭", "group": "L", "seed": 45, "status": "alive" },
+    "ガーナ": { "flag": "🇬🇭", "group": "L", "seed": 45, "status": "alive", "rank": 3 },
     "アルゼンチン": { "flag": "🇦🇷", "group": "J", "seed": 3,  "status": "advanced", "rank": 1 },
     "コロンビア": { "flag": "🇨🇴", "group": "K", "seed": 12, "status": "advanced" },
     "オーストリア": { "flag": "🇦🇹", "group": "J", "seed": 22, "status": "alive" },
@@ -41,7 +41,7 @@
     "スウェーデン": { "flag": "🇸🇪", "group": "F", "seed": 31, "status": "alive", "rank": 3 },
     "ウズベキスタン": { "flag": "🇺🇿", "group": "K", "seed": 37, "status": "alive" },
     "ボスニア": { "flag": "🇧🇦", "group": "B", "seed": 42, "status": "alive", "rank": 3 },
-    "イングランド": { "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "group": "L", "seed": 4,  "status": "alive" },
+    "イングランド": { "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "group": "L", "seed": 4,  "status": "advanced", "rank": 1 },
     "メキシコ": { "flag": "🇲🇽", "group": "A", "seed": 14, "status": "advanced", "rank": 1 },
     "イラン": { "flag": "🇮🇷", "group": "G", "seed": 19, "status": "alive", "rank": 3 },
     "コートジボワール": { "flag": "🇨🇮", "group": "E", "seed": 30, "status": "advanced", "rank": 2 },
@@ -126,6 +126,8 @@
     { "g": "H", "h": "カボベルデ", "a": "サウジアラビア", "hs": 0, "as": 0, "d": "6/26", "played": true },
     { "g": "H", "h": "ウルグアイ", "a": "スペイン", "hs": 0, "as": 1, "d": "6/26", "played": true },
     { "g": "I", "h": "ノルウェー", "a": "フランス", "hs": 1, "as": 4, "d": "6/26", "played": true },
-    { "g": "I", "h": "セネガル", "a": "イラク", "hs": 5, "as": 0, "d": "6/26", "played": true }
+    { "g": "I", "h": "セネガル", "a": "イラク", "hs": 5, "as": 0, "d": "6/26", "played": true },
+    { "g": "L", "h": "パナマ", "a": "イングランド", "hs": 0, "as": 2, "d": "6/27", "played": true },
+    { "g": "L", "h": "クロアチア", "a": "ガーナ", "hs": 2, "as": 1, "d": "6/27", "played": true }
   ]
 }
