@@ -506,18 +506,48 @@ function koBox(m,TEAMS,ownerOf,disp){
   return `<div class="bx ${m.played?'':'pending'}">${side(m.h,hw,aw,pkH)}${side(m.a,aw,hw,pkA)}${foot}</div>`;
 }
 
+/* 各国の最終結果/到達ラウンドを算出。data.json のKOカード(g:R32〜FIN/3rd)の勝敗で勝者を進め、
+   敗者をそのラウンドで確定。label例: グループ敗退/ベスト32/ベスト16/ベスト8/ベスト4/4位/3位/準優勝/優勝。
+   d=到達の深さ(グループ敗退0, R32到達1 … 優勝6)、elim=敗退済みか(優勝・進行中はfalse)。 */
+function computeStages(MATCHES,TEAMS){
+  const R={};
+  Object.keys(TEAMS).forEach(k=>{const s=TEAMS[k].status;
+    if(s==='eliminated')R[k]={label:'グループ敗退',elim:true,d:0};
+    else if(s==='advanced')R[k]={label:'ベスト32',elim:false,d:1};
+    else R[k]={label:'',elim:false,d:-1};});
+  const winLose=m=>{ if(!(m.played&&typeof m.hs==='number'&&typeof m.as==='number'))return null;
+    if(m.hs>m.as||(m.hs===m.as&&m.pkw==='h'))return [m.h,m.a];
+    if(m.as>m.hs||(m.hs===m.as&&m.pkw==='a'))return [m.a,m.h];
+    return null;};
+  const loseLbl={R32:'ベスト32',R16:'ベスト16',QF:'ベスト8',SF:'ベスト4',FIN:'準優勝'};
+  const loseD={R32:1,R16:2,QF:3,SF:4,FIN:5};
+  const reach={R32:{l:'ベスト16',d:2},R16:{l:'ベスト8',d:3},QF:{l:'ベスト4',d:4},SF:{l:'決勝進出',d:5}};
+  ['R32','R16','QF','SF','FIN'].forEach(r=>{
+    MATCHES.forEach(m=>{ if(m.g!==r)return; const wl=winLose(m); if(!wl)return; const w=wl[0],l=wl[1];
+      if(R[l])R[l]={label:loseLbl[r],elim:true,d:loseD[r]};
+      if(R[w]){ if(r==='FIN')R[w]={label:'優勝',elim:false,d:6};
+        else{const nx=reach[r];R[w]={label:nx.l,elim:false,d:nx.d};} }
+    });
+  });
+  MATCHES.forEach(m=>{ if(m.g!=='3rd')return; const wl=winLose(m); if(!wl)return;
+    if(R[wl[0]])R[wl[0]]={label:'3位',elim:true,d:4.6};
+    if(R[wl[1]])R[wl[1]]={label:'4位',elim:true,d:4.5};});
+  return R;
+}
+
 function render(DATA,isLive){
   const META=DATA.meta||{}, PARTICIPANTS=DATA.participants, TEAMS=DATA.teams, MATCHES=DATA.matches;
   const ST=computeStats(TEAMS,MATCHES);
+  const STAGE=computeStages(MATCHES,TEAMS);
   const ownerOf={}; PARTICIPANTS.forEach(p=>p.teams.forEach(t=>ownerOf[t]=p));
   const disp=k=>(TEAMS[k]&&TEAMS[k].name)||k;
-  const agg=p=>{const o={pts:0,w:0,d:0,l:0,gp:0,alive:0,adv:0,elim:0};
-    p.teams.forEach(k=>{const s=ST[k],t=TEAMS[k];o.pts+=s.pts;o.w+=s.w;o.d+=s.d;o.l+=s.l;o.gp+=s.p;
-      if(t.status==="eliminated")o.elim++;else o.alive++; if(t.status==="advanced")o.adv++;});return o;};
+  const agg=p=>{const o={pts:0,w:0,d:0,l:0,gp:0,alive:0,adv:0,elim:0,depth:0};
+    p.teams.forEach(k=>{const s=ST[k],t=TEAMS[k],sg=STAGE[k];o.pts+=s.pts;o.w+=s.w;o.d+=s.d;o.l+=s.l;o.gp+=s.p;o.depth+=Math.max(0,sg.d);
+      if(sg.elim)o.elim++;else o.alive++; if(t.status==="advanced")o.adv++;});return o;};
 
   // meta strip
   const played=MATCHES.filter(m=>m.played).length;
-  const elim=Object.values(TEAMS).filter(t=>t.status==="eliminated").length;
+  const elim=Object.keys(TEAMS).filter(k=>STAGE[k].elim).length;
   const livePill=isLive
     ? `<span class="pill live"><i class="ld"></i>ライブデータ</span>`
     : `<span class="pill snap">スナップショット表示</span>`;
@@ -529,12 +559,12 @@ function render(DATA,isLive){
 
   // survival cards
   const ranked=PARTICIPANTS.map(p=>({p,a:agg(p)}))
-    .sort((x,y)=>y.a.alive-x.a.alive||y.a.adv-x.a.adv||y.a.pts-x.a.pts||x.p.no-y.p.no);
+    .sort((x,y)=>y.a.alive-x.a.alive||y.a.depth-x.a.depth||y.a.pts-x.a.pts||x.p.no-y.p.no);
   document.getElementById("pcards").innerHTML=ranked.map((row,i)=>{
     const {p,a}=row,lead=i===0;
-    const pips=p.teams.map(k=>{const t=TEAMS[k],s=ST[k];let cls="pip",stt="未",stc="";
-      if(t.status==="eliminated"){cls+=" elim";stt="敗退";}
-      else if(t.status==="advanced"){cls+=" adv";stt="突破";stc="adv";}
+    const pips=p.teams.map(k=>{const t=TEAMS[k],s=ST[k],sg=STAGE[k];let cls="pip",stt="未",stc="";
+      if(sg.elim){cls+=" elim";stt=sg.label;}
+      else if(sg.d>=1){stt=sg.label;stc=(sg.label==='優勝')?'win':'adv';}
       else if(s.p>0){stt=s.pts+"pt";if(s.w>0&&s.l===0)stc="win";}
       return `<div class="${cls}"><span class="fl">${t.flag}</span><span class="nm">${esc(disp(k))}</span><span class="st ${stc}">${stt}</span></div>`;
     }).join("");
