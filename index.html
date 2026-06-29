@@ -372,22 +372,65 @@ function rankMaps(TEAMS){
     else if(r===3 && TEAMS[k].status!=='eliminated')third[TEAMS[k].group]=k;});
   return {win, run, third};
 }
-/* スケルトンの1試合ボックス（確定チーム / スロット記号 / 勝者待ち） */
-function skelBox(num,maps,TEAMS,ownerOf,disp){
-  const node=KO_BRACKET[num];
-  const teamRow=k=>{const t=TEAMS[k],o=ownerOf[k];
-    return `<div class="bxr"><span class="fl">${t?t.flag:'🏳️'}</span>`+
-      `<span class="ow" style="background:${o?o.color:'#888'}"></span><span class="nm">${esc(disp(k))}</span></div>`;};
-  const phRow=(label,faint)=>`<div class="bxr ph${faint?' fut':''}"><span class="phl">${esc(label)}</span></div>`;
-  const side=sd=>{
-    if(sd.t==='W'){const k=maps.win[sd.g]; return k?teamRow(k):phRow('1'+sd.g);}
-    if(sd.t==='R'){const k=maps.run[sd.g]; return k?teamRow(k):phRow('2'+sd.g);}
-    if(sd.t==='T'){const k=sd.g?maps.third[sd.g]:null; return k?teamRow(k):phRow('3位 '+sd.gs.split('').join('/'));}
-    if(sd.l!=null) return phRow('敗者',true);
-    return phRow('勝者',true);
+/* 決勝Tの完全ツリーHTMLを生成。確定順位/3位割当でスロットを解決し、data.json の実カード
+   （g:R32〜FIN/3rd）のスコアを重ねて勝者を次戦へ伝播。常に決勝までのツリーを表示する。 */
+function buildBracketHTML(MATCHES,TEAMS,ownerOf,disp){
+  const maps=rankMaps(TEAMS);
+  const slotTeam=sd=>{
+    if(sd.t==='W')return maps.win[sd.g]||null;
+    if(sd.t==='R')return maps.run[sd.g]||null;
+    if(sd.t==='T')return (sd.g&&maps.third[sd.g])||null;
+    return null;
   };
-  const foot=num===104?`<div class="bxd">🏆 優勝</div>`:'';
-  return `<div class="bx${num===104?' fin':''}" data-m="${num}">${side(node.a)}${side(node.b)}${foot}</div>`;
+  const slotLabel=sd=>{
+    if(sd.t==='W')return '1'+sd.g;
+    if(sd.t==='R')return '2'+sd.g;
+    if(sd.t==='T')return '3位 '+(sd.gs?sd.gs.split('').join('/'):'');
+    if(sd.l!=null)return '敗者';
+    return '勝者';
+  };
+  const ROUND=n=>n<=88?'R32':n<=96?'R16':n<=100?'QF':n<=102?'SF':n===103?'3rd':'FIN';
+  const koIdx={};
+  MATCHES.forEach(m=>{ if(KO_KEYS.has(m.g)) koIdx[m.g+'|'+[m.h,m.a].slice().sort().join('~')]=m; });
+  // ノード解決（番号昇順＝フィーダーが先に解決される）
+  const nodes={};
+  for(let n=73;n<=104;n++){
+    const def=KO_BRACKET[n];
+    const sideTeam=sd=>{
+      if(sd.w!=null)return nodes[sd.w]?nodes[sd.w].winner:null;
+      if(sd.l!=null)return nodes[sd.l]?nodes[sd.l].loser:null;
+      return slotTeam(sd);
+    };
+    const a=sideTeam(def.a), b=sideTeam(def.b);
+    let m=null,winner=null,loser=null;
+    if(a&&b){ m=koIdx[ROUND(n)+'|'+[a,b].slice().sort().join('~')]||null;
+      if(m&&m.played&&typeof m.hs==='number'&&typeof m.as==='number'){
+        const hw=m.hs>m.as||(m.hs===m.as&&m.pkw==='h'), aw=m.as>m.hs||(m.hs===m.as&&m.pkw==='a');
+        if(hw){winner=m.h;loser=m.a;} else if(aw){winner=m.a;loser=m.h;}
+      }
+    }
+    nodes[n]={a,b,m,winner,loser};
+  }
+  const box=n=>{
+    const def=KO_BRACKET[n], nd=nodes[n], m=nd.m;
+    const row=(team,sd)=>{
+      if(team){const t=TEAMS[team],o=ownerOf[team];
+        const hasSc=m&&m.played&&typeof m.hs==='number'&&typeof m.as==='number';
+        const sc=hasSc?(team===m.h?m.hs:m.as):'';
+        const win=nd.winner===team, lose=nd.winner&&nd.winner!==team;
+        const pk=(hasSc&&m.hs===m.as&&m.pkw&&((m.pkw==='h'?m.h:m.a)===team))?'<span class="pk">PK</span>':'';
+        return `<div class="bxr ${win?'win':''} ${lose?'lose':''}"><span class="fl">${t?t.flag:'🏳️'}</span>`+
+          `<span class="ow" style="background:${o?o.color:'#888'}"></span><span class="nm">${esc(disp(team))}</span><span class="sc">${sc}${pk}</span></div>`;
+      }
+      const fut=(sd.w!=null||sd.l!=null);
+      return `<div class="bxr ph${fut?' fut':''}"><span class="phl">${esc(slotLabel(sd))}</span></div>`;
+    };
+    const foot=n===104?`<div class="bxd">🏆 ${nd.winner?esc(disp(nd.winner)):'優勝'}</div>`:'';
+    return `<div class="bx${n===104?' fin':''}" data-m="${n}">${row(nd.a,def.a)}${row(nd.b,def.b)}${foot}</div>`;
+  };
+  const cols=SKEL_COLS.map(c=>`<div class="bcol"><div class="bcol-h">${c.label}</div><div class="bcol-b">${c.ms.map(box).join('')}</div></div>`).join('');
+  const third=`<div class="koround"><div class="korhead">3位決定戦</div><div class="b3rd">${box(103)}</div></div>`;
+  return `<div class="bracket">${cols}</div>${third}`;
 }
 
 /* スケルトン・ブラケットの罫線（コネクター）を SVG で描画。ボックスの実位置を測るので
@@ -572,32 +615,8 @@ function render(DATA,isLive){
     ${qList.length?`<div class="qgrid">${qChips}</div>`
       :`<div class="koempty">まだ進出チームがありません。<br>グループステージが進むとここに見込みチームが表示されます。</div>`}</div>`;
 
-  const koMatches=MATCHES.filter(m=>KO_KEYS.has(m.g));
-  let bracketBlock;
-  if(!koMatches.length){
-    // まだ実カードが無い → 公式トーナメント構造(決勝まで)に確定順位を自動充填したツリーを表示
-    const maps=rankMaps(TEAMS);
-    const cols=SKEL_COLS.map(c=>{
-      const boxes=c.ms.map(n=>skelBox(n,maps,TEAMS,ownerOf,disp)).join("");
-      return `<div class="bcol"><div class="bcol-h">${c.label}</div><div class="bcol-b">${boxes}</div></div>`;
-    }).join("");
-    const third=`<div class="koround"><div class="korhead">3位決定戦</div><div class="b3rd">${skelBox(103,maps,TEAMS,ownerOf,disp)}</div></div>`;
-    bracketBlock=`<div class="konote">公式トーナメント表（決勝まで）。グループ順位が確定したチームから自動配置されます（<b>1F</b>・<b>2J</b>等は未確定スロット、<b>3位 …</b>は3位通過枠、<b>勝者</b>は勝ち上がり待ち）。実際の対戦カードとスコアが確定すると順次差し替わります。</div>
-      <div class="bracket">${cols}</div>${third}`;
-  }else{
-    // 本選ラウンドを列にして左→右に配置（試合数が半減してトーナメント表の形になる）
-    const COLS=[["R32","ラウンド32"],["R16","ラウンド16"],["QF","準々決勝"],["SF","準決勝"],["FIN","決勝"]];
-    const cols=COLS.map(([key,label])=>{
-      const ms=koMatches.filter(m=>m.g===key); if(!ms.length) return "";
-      const boxes=ms.map(m=>koBox(m,TEAMS,ownerOf,disp)).join("");
-      return `<div class="bcol"><div class="bcol-h">${label}</div><div class="bcol-b">${boxes}</div></div>`;
-    }).join("");
-    const third=koMatches.filter(m=>m.g==="3rd");
-    const thirdBlock=third.length
-      ? `<div class="koround"><div class="korhead">3位決定戦</div><div class="b3rd">${third.map(m=>koBox(m,TEAMS,ownerOf,disp)).join("")}</div></div>`
-      : "";
-    bracketBlock=`<div class="bracket">${cols}</div>${thirdBlock}`;
-  }
+  const bracketBlock=`<div class="konote">公式トーナメント表（決勝まで）。確定した順位でカードを配置し、試合終了したスコアと勝ち上がりを反映します（<b>勝者</b>は勝ち上がり待ち）。</div>`+
+    buildBracketHTML(MATCHES,TEAMS,ownerOf,disp);
   document.getElementById("kobody").innerHTML=qualBlock+bracketBlock;
   requestAnimationFrame(()=>{ if(!document.getElementById("knockout").hidden) drawKOLines(); });
 
